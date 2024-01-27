@@ -12,83 +12,18 @@ const currentDate = new Date();
 const formattedDate = currentDate.toISOString();
 
 const Home = () => {
+    const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,setDescription,editedID,handleTitleChange,handleDescriptionChange,handleCommentChange,setComment,isComment,handleUploadComment,setTitle,handleTasksubmit,loading} = useContext(AuthContext);
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
+    
     const [isTab , setTab] = useState("timeline");
-    
-   
-
-    const {  user, loading} = useContext(AuthContext);
-    
-
+  
     if (loading) {
         return <span className="loading loading-spinner loading-lg"></span>
-    }
-    const handleTitleChange = (e) => {
-        setTitle(e.target.value);
     }
 
     const ActiveTab = async (value) => {
         setTab(value)
-
 }
-    
-
-    const handleDescriptionChange = (e) => {
-        setDescription(e.target.value);
-    }
-
-  
-
-    const handleTasksubmit = async() => {
-
-        const tasksInfo = {
-            Title : title,
-            Description: description,
-            TaskCreationTime : new Date(),
-            Authorname : user?.displayName,
-            AuthorGmail : user.email
-        }
-        const token = localStorage.getItem('access-token');
-        try {
-            fetch('https://chain-teck-project-server.vercel.app/tasks', {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-                authorization: `bearer ${token}`,
-            },
-            body: JSON.stringify(tasksInfo),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.insertedId) {
-                    
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Task Added Successfully',
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                }
-            })
-            .catch((error) => console.log(error));
-           
-            setTitle('');
-            setDescription("");
-            
-        } catch (error) {
-            console.error('Error adding document: ', error);
-        }
-
-    }
-
- 
-    
-       
-    
-    
 
     const showAuthModal = async ()=>{
         const result= document.getElementById('my_modal_2').showModal();
@@ -101,7 +36,7 @@ const Home = () => {
         <div className='container mx-auto  w-full flex flex-col md:flex-row  '>
             <div className='md:w-1/5 w-full bg-slate-300 md:h-screen sticky top-0'>
                 <h1 className='px-4 py-4 text-success md:block hidden text-center text-3xl'>Menu.</h1>
-                <ul className=' py-3 md:px-8 px-2 text-xl  text-red-800 flex md:flex-col flex-row justify-between'>
+                <ul className=' py-3 md:px-8 px-2 md:text-xl text-sm   text-red-800 flex md:flex-col flex-row justify-between'>
                     <li className={` ${isTab == "timeline" ? "border-green-500 text-red-500" : "" }  py-2  border-b-2 `} onClick={()=>ActiveTab("timeline")}>TimeLine</li>
                    
                     
@@ -144,7 +79,7 @@ const Home = () => {
                         placeholder="Type inside me"
                     />
                     <label
-                        for="username"
+                        htmlFor="username"
                         className="absolute cursor-text left-0 -top-3 text-sm text-gray-500 bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-sky-600 peer-focus:text-sm transition-all"
                     >
                         Task Title
@@ -164,7 +99,7 @@ const Home = () => {
                         placeholder="Type inside me"
                     ></textarea>
                     <label
-                        for="description"
+                        htmlFor="description"
                         className="absolute cursor-text left-0 -top-3 text-sm text-gray-500 bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-sky-600 peer-focus:text-sm transition-all"
                     >
                         Task Description..

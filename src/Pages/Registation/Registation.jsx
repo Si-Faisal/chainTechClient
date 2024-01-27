@@ -64,7 +64,7 @@ const {
         const formData = new FormData();
         formData.append('image', imageFile);
 
-        fetch('https://chain-teck-project-server.vercel.app/Imgupload', {
+        await fetch('https://chain-teck-project-server.vercel.app/Imgupload', {
             method: 'POST',
             body: formData
         })
@@ -79,7 +79,7 @@ const {
                             const loggedUser = result.user;
                           console.log(loggedUser);
                             updateUserProfile(name, imgURL)
-                                .then(() => {
+                                .then(async() => {
                                     const userInformation = {
                                         name: name,
                                         email: email,
@@ -92,7 +92,7 @@ const {
 
                                     const token = localStorage.getItem('access-token');
 
-                                    fetch('https://chain-teck-project-server.vercel.app/users', {
+                                   await fetch('https://chain-teck-project-server.vercel.app/users', {
                                         method: 'POST',
                                         headers: {
                                             'content-type': 'application/json',
@@ -101,10 +101,15 @@ const {
                                         body: JSON.stringify(userInformation),
                                     })
                                         .then((res) => res.json())
-                                        .then((data) => {
+                                        .then(async(data) => {
                                           console.log(data)
                                             if (data.insertedId) {
                                                 reset();
+                                                const response =await fetch('https://chain-teck-project-server.vercel.app/users', {
+                                                  headers: {
+                                                      authorization: `bearar ${token} `
+                                                  }
+                                              });
                                                 notify("Congratulations! You have successfully created your account.", navigate);
                                             }
                                         })
@@ -199,7 +204,7 @@ const {
        
       <div className="grid gap-3 md:grid-cols-2">
           <div> 
-            <label className="" for='FirstName'> First Name </label>
+            <label className="" htmlFor='FirstName'> First Name </label>
             <input
                  className="mt-2 h-12 w-full rounded-md bg-gray-100 outline  outline-1 border-l-4 border-pink-600 outline-blue-500 focus:ring-2 px-3" 
                  placeholder='First Name'
@@ -219,7 +224,7 @@ const {
       )}
           </div>
           <div>
-            <label className="" for='LastName'> Last Name </label>
+            <label className="" htmlFor='LastName'> Last Name </label>
            
             <input type="text" placeholder="Last  Name" className="mt-2  outline  outline-1 border-l-4 border-pink-600 outline-blue-500 focus:ring-2 h-12 w-full rounded-md bg-gray-100 px-3"
                  
@@ -232,7 +237,7 @@ const {
         </div>
         
         <div>
-          <label className="" for='email'> Email Address </label>
+          <label className="" htmlFor='email'> Email Address </label>
           <input
         id="email"
         {...register("email", {
@@ -256,7 +261,7 @@ const {
         </div>
         <div  className="grid gap-3 md:grid-cols-2">
         <div>
-          <label className="" for='password'> Password </label>
+          <label className="" htmlFor='password'> Password </label>
           <input
         id="password"
         {...register("password", {
@@ -286,7 +291,7 @@ const {
         </div>
 
         <div>
-          <label className="" for='Confirm password'>Confirm Password </label>
+          <label className="" htmlFor='Confirm password'>Confirm Password </label>
           <input
         id="confirmpassword"
         {...register("confirmpassword", {
@@ -341,7 +346,7 @@ const {
        
         <div className="checkbox" style={{ whiteSpace: 'nowrap' }}>
         <input type="checkbox" id="checkbox1"  defaultChecked={true} />
-        <label for="checkbox1">
+        <label htmlFor="checkbox1">
           I agree to the <a href="#" target="_blank" className="text-blue-600">Terms and Conditions</a>
         </label>
       </div>
@@ -352,7 +357,7 @@ const {
         </div>
 
         <div>
-        <label for="">Already Have an Account? <span className="text-blue-600"> <Link to="/login">Please Login here..</Link> </span></label>
+        <label htmlFor="">Already Have an Account? <span className="text-blue-600"> <Link to="/login">Please Login here..</Link> </span></label>
 
       </div>
       </form>

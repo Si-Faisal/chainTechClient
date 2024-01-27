@@ -5,7 +5,7 @@ import { AuthContext } from '../../AuthProvider/AuthProvider';
 
 const Header = () => {
   const { logOut , dbUsers , user} = useContext(AuthContext);
-  console.log(user)
+
     return (
         <div className='mb-2'>
             <div className="navbar flex justify-between bg-base-100">

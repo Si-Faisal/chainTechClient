@@ -31,18 +31,18 @@ const AuthProvider = ({ children }) => {
     // Authentication start..........
     const createUser = async (email, password) => {
         setLoading(true);
-        return createUserWithEmailAndPassword(auth, email, password) 
+        return await createUserWithEmailAndPassword(auth, email, password) 
 
     }
 
-    const googleSignIn = () => {
+    const googleSignIn =async () => {
         setLoading(true);
-        return signInWithPopup(auth, googleProvider);
+        return await signInWithPopup(auth, googleProvider);
     }
 
-    const signIn = (email, password) => {
+    const signIn = async (email, password) => {
         setLoading(true);
-        return signInWithEmailAndPassword(auth, email, password);
+        return await signInWithEmailAndPassword(auth, email, password);
     }
 
     const logOut = () => {
@@ -51,14 +51,14 @@ const AuthProvider = ({ children }) => {
         return signOut(auth);
     }
 
-    const updateUserProfile = (name, imgUrl) => {
-        return updateProfile(auth.currentUser, {
+    const updateUserProfile =async (name, imgUrl) => {
+        return await updateProfile(auth.currentUser, {
             displayName: name , photoURL : imgUrl
         });
     }
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, currentUser => {
+        const unsubscribe =onAuthStateChanged(auth, currentUser => {
             setUser(currentUser);
             setLoading(false);
         });
@@ -119,53 +119,7 @@ const AuthProvider = ({ children }) => {
         return [ConsumeTime];
     }
 
-    useEffect(() => {
-        const fetchUsersData = async () => {
-            try {
-                
-                const response = await fetch('https://chain-teck-project-server.vercel.app/users', {
-                    headers: {
-                        authorization: `bearar ${token} `
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user data');
-                }
-                const data = await response.json();
-                setusersDB(data);
-            } catch (error) {
-                // setError(error.message); 
-                console.log(error)
-            } finally {
-                // setIsLoading(false);
-            }
-        };
-
-        const fetchTasksData = async () => {
-            try {
-                
-                const response = await fetch('https://chain-teck-project-server.vercel.app/tasks', {
-                    headers: {
-                        authorization: `bearar ${token} `
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch tasks data');
-                }
-                const data = await response.json();
-                setTasksDB(data);
-            } catch (error) {
-                // setError(error.message); 
-                console.log(error)
-            } finally {
-                // setIsLoading(false);
-            }
-        };
-
-        fetchTasksData();
-
-        fetchUsersData();
-    }, []);
+   
     
     const  handleDeleteTask = async (taskid)=>{
         console.log(taskid)
@@ -188,7 +142,21 @@ const AuthProvider = ({ children }) => {
                     const data = await res.json();
                     console.log(data);
                     if (data.success == true) {
-                        console.log(data)
+                        
+                         await fetch('https://chain-teck-project-server.vercel.app/tasks', {
+                            headers: {
+                                authorization: `bearar ${token} `
+                            }
+                        });
+                         await fetch('https://chain-teck-project-server.vercel.app/users', {
+                            headers: {
+                                authorization: `bearar ${token} `
+                            }
+                        });
+
+
+
+
                         Swal.fire("Task have been deleted!", "", "success");
                     }
                     
@@ -228,10 +196,19 @@ const AuthProvider = ({ children }) => {
     
             })
                 .then(res => res.json())
-                .then(data => {
+                .then(async(data) => {
                     console.log(data)
                     if (data.modifiedCount) {
-    
+                        await fetch('https://chain-teck-project-server.vercel.app/tasks', {
+                            headers: {
+                                authorization: `bearar ${token} `
+                            }
+                        });
+                         await fetch('https://chain-teck-project-server.vercel.app/users', {
+                            headers: {
+                                authorization: `bearar ${token} `
+                            }
+                        });
                       
                         Swal.fire({
                             position: 'top-end',
@@ -306,12 +283,21 @@ const AuthProvider = ({ children }) => {
 
         })
             .then(res => res.json())
-            .then(data => {
+            .then(async(data) => {
                 console.log(data)
                 if (data.acknowledged == true) {
 
                    setComment('');
-                    
+                   await fetch('https://chain-teck-project-server.vercel.app/tasks', {
+                    headers: {
+                        authorization: `bearar ${token} `
+                    }
+                });
+                 await fetch('https://chain-teck-project-server.vercel.app/users', {
+                    headers: {
+                        authorization: `bearar ${token} `
+                    }
+                });
                     Swal.fire({
                         position: 'top-end',
                         icon: 'success',
@@ -325,9 +311,98 @@ const AuthProvider = ({ children }) => {
              console.error("Error updating comment:", error.message);
          }
     }
+    const handleTasksubmit = async() => {
 
+        const tasksInfo = {
+            Title : title,
+            Description: description,
+            TaskCreationTime : new Date(),
+            Authorname : user?.displayName,
+            AuthorGmail : user.email
+        }
+        const token = localStorage.getItem('access-token');
+        try {
+           await fetch('https://chain-teck-project-server.vercel.app/tasks', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                authorization: `bearer ${token}`,
+            },
+            body: JSON.stringify(tasksInfo),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.insertedId) {
+                    setTitle('');
+                    setDescription("");
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Task Added Successfully',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                }
+            })
+            .catch((error) => console.log(error));
+           
+            setTitle('');
+            setDescription("");
+            
+        } catch (error) {
+            console.error('Error adding document: ', error);
+        }
+
+    }
   
-    
+    useEffect(() => {
+        const fetchUsersData = async () => {
+            try {
+                
+                const response = await fetch('https://chain-teck-project-server.vercel.app/users', {
+                    headers: {
+                        authorization: `bearar ${token} `
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+                const data = await response.json();
+                setusersDB(data);
+            } catch (error) {
+                // setError(error.message); 
+                console.log(error)
+            } finally {
+                // setIsLoading(false);
+            }
+        };
+       
+
+        const fetchTasksData = async () => {
+            try {
+                
+                const response = await fetch('https://chain-teck-project-server.vercel.app/tasks', {
+                    headers: {
+                        authorization: `bearar ${token} `
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch tasks data');
+                }
+                const data = await response.json();
+                setTasksDB(data);
+            } catch (error) {
+                // setError(error.message); 
+                console.log(error)
+            } finally {
+                // setIsLoading(false);
+            }
+        };
+
+        fetchTasksData();
+
+        fetchUsersData();
+    }, [handleDeleteTask,upDateATaskContent,handleTasksubmit]);
   
 
     const AuthDetails = {
@@ -356,7 +431,8 @@ const AuthProvider = ({ children }) => {
         editedID,
         isComment,
         setComment,
-        handleUploadComment
+        handleUploadComment,
+        handleTasksubmit
     }
 
     return (
