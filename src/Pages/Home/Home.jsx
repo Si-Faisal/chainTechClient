@@ -16,7 +16,7 @@ const Home = () => {
 
     
     const [isTab , setTab] = useState("timeline");
-  
+  console.log(user)
     if (loading) {
         return <span className="loading loading-spinner loading-lg"></span>
     }
@@ -24,6 +24,8 @@ const Home = () => {
     const ActiveTab = async (value) => {
         setTab(value)
 }
+
+
 
     const showAuthModal = async ()=>{
         const result= document.getElementById('my_modal_2').showModal();

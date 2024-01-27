@@ -17,6 +17,7 @@ const AuthProvider = ({ children }) => {
     const [description, setDescription] = useState('');
     const [editedID, setEditedId] = useState();
     const [isComment , setComment]= useState('');
+    const [refetch ,setRefetch] = useState(false);
 
     const googleProvider = new GoogleAuthProvider();
 
@@ -141,6 +142,7 @@ const AuthProvider = ({ children }) => {
                     });
                     const data = await res.json();
                     console.log(data);
+                   
                     if (data.success == true) {
                         
                          await fetch('https://chain-teck-project-server.vercel.app/tasks', {
@@ -156,8 +158,10 @@ const AuthProvider = ({ children }) => {
 
 
 
-
+                        setRefetch(true)
                         Swal.fire("Task have been deleted!", "", "success");
+
+                        
                     }
                     
                 } catch (error) {
@@ -199,6 +203,8 @@ const AuthProvider = ({ children }) => {
                 .then(async(data) => {
                     console.log(data)
                     if (data.modifiedCount) {
+                        setTitle('');
+                        setDescription('');
                         await fetch('https://chain-teck-project-server.vercel.app/tasks', {
                             headers: {
                                 authorization: `bearar ${token} `
@@ -217,6 +223,7 @@ const AuthProvider = ({ children }) => {
                             showConfirmButton: false,
                             timer: 1500
                         })
+                        setRefetch(true)
                     }
                 })
              } catch (error) {
@@ -292,6 +299,7 @@ const AuthProvider = ({ children }) => {
                     headers: {
                         authorization: `bearar ${token} `
                     }
+                    
                 });
                  await fetch('https://chain-teck-project-server.vercel.app/users', {
                     headers: {
@@ -305,6 +313,7 @@ const AuthProvider = ({ children }) => {
                         showConfirmButton: false,
                         timer: 1500
                     })
+                     setRefetch(true)
                 }
             })
          } catch (error) {
@@ -333,6 +342,7 @@ const AuthProvider = ({ children }) => {
             .then((res) => res.json())
             .then((data) => {
                 if (data.insertedId) {
+               
                     setTitle('');
                     setDescription("");
                     Swal.fire({
@@ -342,6 +352,7 @@ const AuthProvider = ({ children }) => {
                         showConfirmButton: false,
                         timer: 1500
                     })
+                     setRefetch(true)
                 }
             })
             .catch((error) => console.log(error));
@@ -402,10 +413,11 @@ const AuthProvider = ({ children }) => {
         fetchTasksData();
 
         fetchUsersData();
-    }, [handleDeleteTask,upDateATaskContent,handleTasksubmit]);
+    }, [refetch]);
   
 
     const AuthDetails = {
+        setRefetch,
         handleDescriptionChange,
         handleCommentChange,
         handleTitleChange,

@@ -52,7 +52,7 @@ const Timeline = () => {
         };
 
         try {
-          fetch('https://chain-teck-project-server.vercel.app/usernotification', {
+          fetch('http://localhost:5000/usernotification', {
           method: 'POST',
           headers: {
               'content-type': 'application/json',

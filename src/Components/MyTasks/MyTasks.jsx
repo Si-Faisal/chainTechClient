@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../AuthProvider/AuthProvider';
 import { IoMdSend } from "react-icons/io";
 import { FaEdit } from "react-icons/fa";
@@ -14,7 +14,7 @@ const currentDate = new Date();
 const formattedDate = currentDate.toISOString();
 
 const MyTasks = () => {
-    const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,editedID,handleTitleChange,handleDescriptionChange,handleCommentChange,setComment,isComment,handleUploadComment} = useContext(AuthContext);
+    const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,editedID,handleTitleChange,handleDescriptionChange,handleCommentChange,setComment,isComment,handleUploadComment,setRefetch} = useContext(AuthContext);
  
 
     if (!usersDB && !user) {
@@ -26,8 +26,11 @@ const MyTasks = () => {
      
   }
   
-  const MyCreatedTask = tasksDB?.filter(tasks => tasks?.AuthorGmail == user?.email);
   
+  const MyCreatedTask = tasksDB?.filter(tasks => tasks?.AuthorGmail == user?.email);
+  if(MyCreatedTask){
+    setRefetch(true)
+  }
     return (
         <div>
             {MyCreatedTask ?<>
