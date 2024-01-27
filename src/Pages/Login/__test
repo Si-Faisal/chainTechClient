@@ -1,0 +1,51 @@
+const [disabled, setDisabled] = useState(true);
+    const { signIn } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const from = location.state?.from?.pathname || "/";
+
+    useEffect(() => {
+        loadCaptchaEnginge(6);
+    }, [])
+
+    const handleValidateCaptcha = (e) => {
+        const user_captcha_value = e.target.value;
+        //  console.log("hello", user_captcha_value)
+        //  console.log(validateCaptcha(user_captcha_value))
+        if (validateCaptcha(user_captcha_value)) {
+            setDisabled(false);
+        }
+        else {
+            setDisabled(true)
+        }
+    }
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset
+    } = useForm();
+
+    const onSubmit = (data) => {
+        const email = data.mail;
+        const password = data.password;
+        console.log(email, password);
+        signIn(email, password)
+            .then(result => {
+                const user = result.user;
+                console.log(user);
+                Swal.fire({
+                    title: 'User Login Successful.',
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
+                reset
+                navigate(from, { replace: true });
+            })
+    };
