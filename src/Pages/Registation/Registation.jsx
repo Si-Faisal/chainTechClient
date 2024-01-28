@@ -17,7 +17,7 @@ const Registation = () => {
   const navigate = useNavigate();
   
   const [isGoogleset,setgooglelogged] = useState(false);
-  const { user, createUser, updateUserProfile , googleSignIn  } = useContext(AuthContext);
+  const { user, createUser, updateUserProfile , googleSignIn ,setRefetch } = useContext(AuthContext);
   
 const {
     register,
@@ -110,6 +110,7 @@ const {
                                                       authorization: `bearar ${token} `
                                                   }
                                               });
+                                              setRefetch(true)
                                                 notify("Congratulations! You have successfully created your account.", navigate);
                                             }
                                         })
