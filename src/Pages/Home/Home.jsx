@@ -12,9 +12,9 @@ const currentDate = new Date();
 const formattedDate = currentDate.toISOString();
 
 const Home = () => {
-    const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,setDescription,editedID,handleTitleChange,handleDescriptionChange,handleCommentChange,setComment,isComment,handleUploadComment,setTitle,handleTasksubmit,loading} = useContext(AuthContext);
+    const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,setDescription,editedID,handleTitleChange,handleDescriptionChange,handleCommentChange,setComment,isComment,handleUploadComment,setTitle,handleTasksubmit,loading,setRefetch} = useContext(AuthContext);
 
-    
+    console.log(user,usersDB,tasksDB)
     const [isTab , setTab] = useState("timeline");
   console.log(user)
     if (loading) {
@@ -22,6 +22,7 @@ const Home = () => {
     }
 
     const ActiveTab = async (value) => {
+        setRefetch(true);
         setTab(value)
 }
 

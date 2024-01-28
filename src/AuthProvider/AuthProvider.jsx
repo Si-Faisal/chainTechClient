@@ -61,6 +61,7 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe =onAuthStateChanged(auth, currentUser => {
             setUser(currentUser);
+            setRefetch(true);
             setLoading(false);
         });
         return () => {
@@ -370,16 +371,14 @@ const AuthProvider = ({ children }) => {
         const fetchUsersData = async () => {
             try {
                 
-                const response = await fetch('https://chain-teck-project-server.vercel.app/users', {
-                    headers: {
-                        authorization: `bearar ${token} `
-                    }
-                });
+               if(!loading){
+                const response = await fetch('https://chain-teck-project-server.vercel.app/users');
                 if (!response.ok) {
                     throw new Error('Failed to fetch user data');
                 }
                 const data = await response.json();
                 setusersDB(data);
+               }
             } catch (error) {
                 // setError(error.message); 
                 console.log(error)
@@ -392,16 +391,17 @@ const AuthProvider = ({ children }) => {
         const fetchTasksData = async () => {
             try {
                 
-                const response = await fetch('https://chain-teck-project-server.vercel.app/tasks', {
-                    headers: {
-                        authorization: `bearar ${token} `
-                    }
-                });
+               
+                if(!loading){
+                    const response = await fetch('https://chain-teck-project-server.vercel.app/tasks');
                 if (!response.ok) {
                     throw new Error('Failed to fetch tasks data');
                 }
                 const data = await response.json();
                 setTasksDB(data);
+                }
+             
+                
             } catch (error) {
                 // setError(error.message); 
                 console.log(error)
