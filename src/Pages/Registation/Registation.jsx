@@ -17,7 +17,7 @@ const Registation = () => {
   const navigate = useNavigate();
   
   const [isGoogleset,setgooglelogged] = useState(false);
-  const { user, createUser, updateUserProfile , googleSignIn ,setRefetch } = useContext(AuthContext);
+  const { user,setLoading, createUser, updateUserProfile , googleSignIn ,setRefetch } = useContext(AuthContext);
   
 const {
     register,
@@ -35,7 +35,7 @@ const {
      
       await googleSignIn();
       setgooglelogged(true);
-
+      setLoading(false);
       if(isGoogleset == true){
         notify("Congratulations You Successfully created Your Account", navigate)
       }
@@ -48,7 +48,7 @@ const {
   const formattedDate = currentDate.toISOString();
 
       const onSubmit = async (data) => {
-       
+        setLoading(true)
         const password = data.confirmpassword;
         const gender = data.gender;
         const email = data.email;
@@ -69,12 +69,12 @@ const {
             body: formData
         })
             .then(res => res.json())
-            .then(imgResponse => {
+            .then(async(imgResponse) => {
                 if (imgResponse.success) {
                     const imgURL = imgResponse.data.display_url;
                     console.log(imgURL);
 
-                    createUser(email, password)
+                   await createUser(email, password)
                         .then((result) => {
                             const loggedUser = result.user;
                           console.log(loggedUser);
@@ -91,7 +91,7 @@ const {
                                     };
 
                                     const token = localStorage.getItem('access-token');
-
+                                   
                                    await fetch('https://chain-teck-project-server.vercel.app/users', {
                                         method: 'POST',
                                         headers: {
@@ -105,12 +105,9 @@ const {
                                           console.log(data)
                                             if (data.insertedId) {
                                                 reset();
-                                                const response =await fetch('https://chain-teck-project-server.vercel.app/users', {
-                                                  headers: {
-                                                      authorization: `bearar ${token} `
-                                                  }
-                                              });
-                                              setRefetch(true)
+                                                setLoading(false);
+                                              
+                                               setRefetch(true)
                                                 notify("Congratulations! You have successfully created your account.", navigate);
                                             }
                                         })

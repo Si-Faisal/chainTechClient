@@ -14,7 +14,8 @@ const currentDate = new Date();
 const formattedDate = currentDate.toISOString();
 
 const MyTasks = () => {
-    const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,editedID,handleTitleChange,handleDescriptionChange,handleCommentChange,setComment,isComment,handleUploadComment,setRefetch} = useContext(AuthContext);
+  const [commentStates, setCommentStates] = useState({});
+    const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,editedID,handleTitleChange,handleDescriptionChange,setRefetch} = useContext(AuthContext);
  
 
     if (!usersDB && !user) {
@@ -25,6 +26,57 @@ const MyTasks = () => {
     document.getElementById('my_modal_2').showModal();
      
   }
+
+  const handleCommentChange = (postId, value) => { 
+    setCommentStates(prevState => ({
+      
+      [postId] : value,
+    }));
+  };
+
+const handleUploadComment =async (id)=>{
+    
+    const newcomment = {
+      usercomment: commentStates[id],
+        CommenterName : user?.displayName,
+        CommenterEmail : user?.email
+    }
+
+
+    try {
+        
+  const token = localStorage.getItem("access-token");
+    fetch(`https://chain-teck-project-server.vercel.app/task/comment/${id}`, {
+
+        method: "PATCH",
+        headers: {
+            "content-type": "application/json",
+            authorization: `bearar ${token} `
+        },
+        body: JSON.stringify(newcomment)
+
+    })
+        .then(res => res.json())
+        .then(async(data) => {
+            console.log(data)
+            if (data.acknowledged == true) {
+
+              setCommentStates(prevState => ({ ...prevState, [id]: '' })); 
+               
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Comment to the Task',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+                 setRefetch(true)
+            }
+        })
+     } catch (error) {
+         console.error("Error updating comment:", error.message);
+     }
+}
   
   
   const MyCreatedTask = tasksDB?.filter(tasks => tasks?.AuthorGmail == user?.email);
@@ -115,7 +167,7 @@ const MyTasks = () => {
                       <span>
                        
 
-                      {CalculateTimeStamp(cmt.CommentTime).map(
+                      {CalculateTimeStamp(cmt?.CommentTime).map(
                   (time) => {
                     if (time.IntervalMinute < 1) {
                       return <span key={post._id} className='text-green-400'>Just now </span>;
@@ -161,10 +213,11 @@ const MyTasks = () => {
                 
                    
                 
-                <textarea value={isComment} onChange={handleCommentChange} id='comment' placeholder="write a comment" className="textarea textarea-bordered textarea-md w-full" ></textarea>
+                <textarea  value={commentStates[post._id] || ''}
+                onChange={(e) => handleCommentChange(post._id, e.target.value)} id='comment' placeholder="write a comment" className="textarea textarea-bordered textarea-md w-full" ></textarea>
                 <div className='text-right '>
                 <button
-                disabled={isComment === ""}
+                disabled={typeof commentStates[post._id] == "undefined"}
                 onClick={ ()=> (user?.uid ? handleUploadComment(post._id) : showAuthModal()) }
                 className='px-3 btn text-xl py-2 text-green-500 border'><IoMdSend />send</button>
                 </div>

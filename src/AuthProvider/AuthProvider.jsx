@@ -16,7 +16,7 @@ const AuthProvider = ({ children }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [editedID, setEditedId] = useState();
-    const [isComment , setComment]= useState('');
+    
     const [refetch ,setRefetch] = useState(false);
 
     const googleProvider = new GoogleAuthProvider();
@@ -25,7 +25,7 @@ const AuthProvider = ({ children }) => {
 
 
 
-    if(!user){
+    if(loading){
         <span className="loading loading-spinner loading-lg"></span>
     }
   
@@ -47,7 +47,6 @@ const AuthProvider = ({ children }) => {
     }
 
     const logOut = () => {
-        setLoading(true);
         setUser(null);
         return signOut(auth);
     }
@@ -61,8 +60,15 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe =onAuthStateChanged(auth, currentUser => {
             setUser(currentUser);
+            console.log(currentUser)
+            if(currentUser){
+                localStorage.setItem("access-token", currentUser?.accessToken
+                )
+            }
+            else {
+                localStorage.removeItem("access-token")
+            }
             setRefetch(true);
-            setLoading(false);
         });
         return () => {
             return unsubscribe();
@@ -124,8 +130,6 @@ const AuthProvider = ({ children }) => {
    
     
     const  handleDeleteTask = async (taskid)=>{
-        console.log(taskid)
-            
             Swal.fire({
                 title: "Do you want to delete the task?",
                 showDenyButton: false,
@@ -145,24 +149,9 @@ const AuthProvider = ({ children }) => {
                     console.log(data);
                    
                     if (data.success == true) {
-                        
-                         await fetch('https://chain-teck-project-server.vercel.app/tasks', {
-                            headers: {
-                                authorization: `bearar ${token} `
-                            }
-                        });
-                         await fetch('https://chain-teck-project-server.vercel.app/users', {
-                            headers: {
-                                authorization: `bearar ${token} `
-                            }
-                        });
-
-
-
                         setRefetch(true)
                         Swal.fire("Task have been deleted!", "", "success");
 
-                        
                     }
                     
                 } catch (error) {
@@ -177,9 +166,7 @@ const AuthProvider = ({ children }) => {
 
 
         const upDateATaskContent = async(id, updatedTitle, updatedDec)=>{
-       
         
-           
             console.log(id, updatedTitle,updatedDec)
     
             const Newdata = {
@@ -206,16 +193,7 @@ const AuthProvider = ({ children }) => {
                     if (data.modifiedCount) {
                         setTitle('');
                         setDescription('');
-                        await fetch('https://chain-teck-project-server.vercel.app/tasks', {
-                            headers: {
-                                authorization: `bearar ${token} `
-                            }
-                        });
-                         await fetch('https://chain-teck-project-server.vercel.app/users', {
-                            headers: {
-                                authorization: `bearar ${token} `
-                            }
-                        });
+                       
                       
                         Swal.fire({
                             position: 'top-end',
@@ -263,64 +241,7 @@ const AuthProvider = ({ children }) => {
     }
 
 
-    const handleCommentChange = (e)=>{
-        setComment(e.target.value);
-               
-    }
-
-    const handleUploadComment =async (id)=>{
-        console.log(id);
-        const newcomment = {
-            usercomment : isComment,
-            CommenterName : user?.displayName,
-            CommenterEmail : user?.email
-        }
-
-    
-        try {
-            
-      const token = localStorage.getItem("access-token");
-        fetch(`https://chain-teck-project-server.vercel.app/task/comment/${id}`, {
-
-            method: "PATCH",
-            headers: {
-                "content-type": "application/json",
-                authorization: `bearar ${token} `
-            },
-            body: JSON.stringify(newcomment)
-
-        })
-            .then(res => res.json())
-            .then(async(data) => {
-                console.log(data)
-                if (data.acknowledged == true) {
-
-                   setComment('');
-                   await fetch('https://chain-teck-project-server.vercel.app/tasks', {
-                    headers: {
-                        authorization: `bearar ${token} `
-                    }
-                    
-                });
-                 await fetch('https://chain-teck-project-server.vercel.app/users', {
-                    headers: {
-                        authorization: `bearar ${token} `
-                    }
-                });
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Comment to the Task',
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                     setRefetch(true)
-                }
-            })
-         } catch (error) {
-             console.error("Error updating comment:", error.message);
-         }
-    }
+  
     const handleTasksubmit = async() => {
 
         const tasksInfo = {
@@ -368,49 +289,38 @@ const AuthProvider = ({ children }) => {
     }
   
     useEffect(() => {
+        setLoading(true)
         const fetchUsersData = async () => {
+            
             try {
-                
-               if(!loading){
                 const response = await fetch('https://chain-teck-project-server.vercel.app/users');
                 if (!response.ok) {
                     throw new Error('Failed to fetch user data');
                 }
                 const data = await response.json();
                 setusersDB(data);
-               }
+        
+                const taskresponse = await fetch('https://chain-teck-project-server.vercel.app/tasks');
+                if (!taskresponse.ok) {
+                    throw new Error('Failed to fetch tasks data');
+                }
+                const taskdata = await taskresponse.json();
+                setTasksDB(taskdata);
+                
+                setLoading(false)
+                
             } catch (error) {
                 // setError(error.message); 
                 console.log(error)
             } finally {
-                // setIsLoading(false);
+                setLoading(false);
+                setRefetch(true);
             }
         };
        
 
-        const fetchTasksData = async () => {
-            try {
-                
-               
-                if(!loading){
-                    const response = await fetch('https://chain-teck-project-server.vercel.app/tasks');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch tasks data');
-                }
-                const data = await response.json();
-                setTasksDB(data);
-                }
-             
-                
-            } catch (error) {
-                // setError(error.message); 
-                console.log(error)
-            } finally {
-                // setIsLoading(false);
-            }
-        };
 
-        fetchTasksData();
+    
 
         fetchUsersData();
     }, [refetch]);
@@ -419,10 +329,10 @@ const AuthProvider = ({ children }) => {
     const AuthDetails = {
         setRefetch,
         handleDescriptionChange,
-        handleCommentChange,
         handleTitleChange,
         user,
         loading,
+        setLoading,
         createUser,
         googleSignIn,
         signIn,
@@ -441,9 +351,6 @@ const AuthProvider = ({ children }) => {
         description,
         setDescription,
         editedID,
-        isComment,
-        setComment,
-        handleUploadComment,
         handleTasksubmit
     }
 

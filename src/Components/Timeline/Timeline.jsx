@@ -12,10 +12,8 @@ const currentDate = new Date();
 const formattedDate = currentDate.toISOString();
 
 const Timeline = () => {
-
-  const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,setDescription,editedID,handleTitleChange,handleDescriptionChange,handleCommentChange,setComment,isComment,handleUploadComment,setTitle} = useContext(AuthContext);
-
-  
+  const [commentStates, setCommentStates] = useState({});
+  const {  user,usersDB,tasksDB, CalculateTimeStamp,handleDeleteTask,upDateATaskContent,UpdateTask,title,description,setDescription,editedID,handleTitleChange,handleDescriptionChange,setTitle,setRefetch} = useContext(AuthContext);
 
 
     const [userEmails, setUserEmails] = useState([]);
@@ -39,6 +37,57 @@ const Timeline = () => {
    const handleAssignedUserChange = (e) => {
     setAssignedUserEmail(e.target.value);
   };
+
+  const handleCommentChange = (postId, value) => { 
+    setCommentStates(prevState => ({
+      
+      [postId] : value,
+    }));
+  };
+
+const handleUploadComment =async (id)=>{
+    
+    const newcomment = {
+      usercomment: commentStates[id],
+        CommenterName : user?.displayName,
+        CommenterEmail : user?.email
+    }
+
+
+    try {
+        
+  const token = localStorage.getItem("access-token");
+    fetch(`https://chain-teck-project-server.vercel.app/task/comment/${id}`, {
+
+        method: "PATCH",
+        headers: {
+            "content-type": "application/json",
+            authorization: `bearar ${token} `
+        },
+        body: JSON.stringify(newcomment)
+
+    })
+        .then(res => res.json())
+        .then(async(data) => {
+            console.log(data)
+            if (data.acknowledged == true) {
+
+              setCommentStates(prevState => ({ ...prevState, [id]: '' })); 
+               
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Comment to the Task',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+                 setRefetch(true)
+            }
+        })
+     } catch (error) {
+         console.error("Error updating comment:", error.message);
+     }
+}
 
     const assignTaskToUser = async (taskId, userEmail) => {
       console.log(taskId , userEmail)
@@ -214,31 +263,31 @@ const Timeline = () => {
                 <div className='my-3'>
 
                 {
-                    post?.Comment?.map((cmt, i) => <div key={i} className='border p-2'> 
+                    post?.comments?.map((cmt, i) => <div key={i} className='border p-2'> 
                       <div className='flex justify-between '>
                       <span className='mb-1 text-lg text-primary'>{cmt.CommenterName? cmt.CommenterName : "Anonymous"}</span>
                       <span>
                        
 
-                      {CalculateTimeStamp(cmt?.CommentTime?.seconds, cmt?.CommentTime?.nanoseconds).map(
+                      {CalculateTimeStamp(cmt?.CommentTime).map(
                   (time) => {
                     if (time.IntervalMinute < 1) {
-                      return <span key={post.id} className='text-green-400'>Just now </span>;
+                      return <span key={post._id} className='text-green-400'>Just now </span>;
                     } else if (time.IntervalMinute < 60) {
                       return (
-                        <span key={post.id} className='text-green-400'>
+                        <span key={post._id} className='text-green-400'>
                           {time.ThoseHour}:{time.ThoseMinute} {time.AmPm} ({time.IntervalMinute} minutes ago) 
                         </span>
                       );
                     } else if (time.IntervalHour < 24) {
                       return (
-                        <span key={post.id} className='text-green-400'>
+                        <span key={post._id} className='text-green-400'>
                           {time.ThoseHour}:{time.ThoseMinute} {time.AmPm} ({time.IntervalHour} hours ago) 
                         </span>
                       );
                     } else if (time.IntervalDays < 7) {
                       return (
-                        <span key={post.id} className='text-green-400'>
+                        <span key={post._id} className='text-green-400'>
                           {time.ThoseHour}:{time.ThoseMinute} {time.AmPm} ({time.IntervalDays} days ago) 
                         </span>
                       );
@@ -246,7 +295,7 @@ const Timeline = () => {
                      
 
                       return (
-                        <span key={post.id}>
+                        <span key={post._id}>
                           
                         </span>
                       );
@@ -266,11 +315,14 @@ const Timeline = () => {
                 
                    
                 
-                <textarea value={isComment} onChange={handleCommentChange} id='comment' placeholder="write a comment" className="textarea textarea-bordered textarea-md w-full" ></textarea>
+                <textarea  value={commentStates[post._id] || ''}
+                onChange={(e) => handleCommentChange(post._id, e.target.value)} id='comment' placeholder="write a comment" className="textarea textarea-bordered textarea-md w-full" ></textarea>
                 <div className='text-right '>
                 <button 
-                onClick={ ()=> (user?.uid ? handleUploadComment(post.id) : showAuthModal()) }
-               disabled={isComment === ""}
+                onClick={ ()=> (user?.uid ? handleUploadComment(post._id) : showAuthModal()) }
+                
+                
+                disabled={typeof commentStates[post._id] == "undefined"}
                 className="px-3 btn text-xl py-2 text-green-500 border"><IoMdSend />send</button>
                 </div>
             </div> 

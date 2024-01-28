@@ -8,7 +8,7 @@ import { AuthContext } from '../../AuthProvider/AuthProvider';
 const Login = () => {
     const [isLoginError,setLoginError] = useState("");
     const [ isGoogleset , setgooglelogged] = useState(false);
-    const {  googleSignIn ,user, signIn } = useContext(AuthContext);
+    const {  googleSignIn ,user, signIn ,setLoading} = useContext(AuthContext);
     const [disabled, setDisabled] = useState(true);
    
     const navigate = useNavigate();
@@ -22,6 +22,7 @@ const Login = () => {
           await googleSignIn();
           
           setgooglelogged(true);
+          setLoading(false)
         } catch (error) {
           console.error("Google sign-in error:", error);
           
@@ -41,6 +42,7 @@ const Login = () => {
        try {
         const userLogin = await signIn(email,password);
         console.log(userLogin)
+        setLoading(false)
          const navigateBack =  navigate(from, { replace: true });
         if(userLogin?.user){
             notify("You have successfully login your account.", navigateBack);

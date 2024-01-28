@@ -1,10 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { AuthContext } from '../../AuthProvider/AuthProvider';
 
 const RegisterUser = () => {
-    const {  usersDB} = useContext(AuthContext);
+    const {  usersDB,setRefetch} = useContext(AuthContext);
     
-   
+   useEffect(()=>{
+    setRefetch(true)
+   },[])
     return (
         <div className='bg-slate-300 p-2 sticky top-0'>
             <h1 className='text-2xl text-green-600'>All Register User</h1>
